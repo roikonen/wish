@@ -1,0 +1,27 @@
+# === sbt ===
+target/
+project/target/
+project/project/
+
+# === BSP / Metals / Bloop ===
+.bsp/
+.metals/
+.bloop/
+
+# === IDEs ===
+.idea/
+.vscode/
+.worksheet/
+
+# === Scala ===
+*.class
+*.tasty
+*.jar
+*.log
+
+# === OS / Editors ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
