@@ -1,6 +1,6 @@
-package fi.roikonen.engine
+package fi.roikonen.structure
 
-import fi.roikonen.engine.Command.{Command, CommandEffect}
+import fi.roikonen.structure.Command.{Command, CommandEffect}
 
 trait CommandHandler[S <: State, C <: Command] {
   def handle(state: S, command: C): CommandEffect

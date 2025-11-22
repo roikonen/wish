@@ -1,9 +1,11 @@
-package fi.roikonen.engine
+package fi.roikonen.structure
 
 import scala.concurrent.Future
 
-trait StreamProcessor {
+trait EventHandler {
+
   def stream: StreamIdentifier
-  def currentOffset: Int
+
+  // At-least-once, take care of deduplication
   def when(event: PrivateEvent): Future[Unit]
 }
