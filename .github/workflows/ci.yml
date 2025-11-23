@@ -9,6 +9,10 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: wish-management
+
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -26,7 +30,7 @@ jobs:
             ~/.ivy2/cache
             ~/.sbt
             ~/.cache/coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '**/project/*.sbt', '**/project/build.properties') }}
+          key: ${{ runner.os }}-sbt-${{ hashFiles('wish-management/**/build.sbt', 'wish-management/**/project/*.sbt', 'wish-management/**/project/build.properties') }}
           restore-keys: |
             ${{ runner.os }}-sbt-
 
@@ -40,15 +44,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gwt-specs-static
-          path: target/gwt-docs/gwt-specs-static.md
+          path: wish-management/target/gwt-docs/gwt-specs-static.md
 
       - name: Upload test reports (if present)
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
           path: |
-            target/test-reports
-            target/scala-*/test-reports
+            wish-management/target/test-reports
+            wish-management/target/scala-*/test-reports
           if-no-files-found: ignore
 
       - name: Add summary with links
@@ -58,7 +62,7 @@ jobs:
             echo "## ✅ Tests & GWT Specs"
             echo
             echo "- **Test reports**: uploaded as artifact \`test-reports\`"
-            echo "- **GWT Specs**: uploaded as artifact \`gwt-specs-static\` (file: \`target/gwt-docs/gwt-specs-static.md\`)"
+            echo "- **GWT Specs**: uploaded as artifact \`gwt-specs-static\` (file: \`wish-management/target/gwt-docs/gwt-specs-static.md\`)"
             echo
-            echo "You can download these from the **Artifacts** section of this workflow run."
+            echo "Download them from the **Artifacts** section of this workflow run."
           } >> "$GITHUB_STEP_SUMMARY"
