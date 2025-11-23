@@ -60,7 +60,7 @@ jobs:
             wish-management/target/scala-*/test-reports
           if-no-files-found: ignore
 
-      - name: Add summary with links
+      - name: Add summary with links and GWT specs
         if: always()
         run: |
           {
@@ -69,5 +69,12 @@ jobs:
             echo "- **Test reports**: uploaded as artifact \`test-reports\`"
             echo "- **GWT Specs**: uploaded as artifact \`gwt-specs-static\` (file: \`wish-management/target/gwt-docs/gwt-specs-static.md\`)"
             echo
-            echo "Download them from the **Artifacts** section of this workflow run."
+            echo "### 📜 GWT Specs (inline)"
+            echo
+            if [ -f target/gwt-docs/gwt-specs-static.md ]; then
+              # skip the first line '# GWT Specs' so headings nest cleanly
+              tail -n +2 target/gwt-docs/gwt-specs-static.md
+            else
+              echo "_No GWT specs generated_"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
