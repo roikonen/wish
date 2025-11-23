@@ -1,6 +1,6 @@
 package fi.roikonen.domain.wish.projection
 
-import fi.roikonen.domain.wish.Child.WishApproved
+import fi.roikonen.domain.wish.PrivateEvents.WishApproved
 import fi.roikonen.structure.{PrivateEvent, StateProjection, StreamIdentifier}
 import fi.roikonen.domain.wish.Stream
 

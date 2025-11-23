@@ -1,6 +1,6 @@
 package fi.roikonen.domain.wish.projection
 
-import fi.roikonen.domain.wish.Child.BecameNaughty
+import fi.roikonen.domain.wish.PrivateEvents.BecameNaughty
 import fi.roikonen.structure.{PrivateEvent, StateProjection, StreamIdentifier}
 
 import java.time.Instant

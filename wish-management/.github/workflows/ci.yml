@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Cache sbt / Ivy / Coursier
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.ivy2/cache
+            ~/.sbt
+            ~/.cache/coursier
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '**/project/*.sbt', '**/project/build.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-
+
+      - name: Run tests and generate GWT specs
+        run: |
+          sbt \
+            test \
+            "Test / runMain fi.roikonen.tools.GwtDocGenerator"
+
+      - name: Upload GWT specs
+        uses: actions/upload-artifact@v4
+        with:
+          name: gwt-specs-static
+          path: target/gwt-docs/gwt-specs-static.md
+
+      - name: Upload test reports (if present)
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            target/test-reports
+            target/scala-*/test-reports
+          if-no-files-found: ignore
+
+      - name: Add summary with links
+        if: always()
+        run: |
+          {
+            echo "## ✅ Tests & GWT Specs"
+            echo
+            echo "- **Test reports**: uploaded as artifact \`test-reports\`"
+            echo "- **GWT Specs**: uploaded as artifact \`gwt-specs-static\` (file: \`target/gwt-docs/gwt-specs-static.md\`)"
+            echo
+            echo "You can download these from the **Artifacts** section of this workflow run."
+          } >> "$GITHUB_STEP_SUMMARY"

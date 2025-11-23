@@ -1,6 +1,6 @@
 package fi.roikonen.domain.wish.policy.eventhandler
 
-import fi.roikonen.domain.wish.Child.{RejectionReason, WishRejected}
+import fi.roikonen.domain.wish.PrivateEvents.{RejectionReason, WishRejected}
 import fi.roikonen.domain.wish.{PublicEvent, Stream, Topic}
 import fi.roikonen.domain.wish.PublicEvent.NaughtinessDetected
 import fi.roikonen.structure.{EventBus, EventHandler, PrivateEvent, StreamIdentifier}
