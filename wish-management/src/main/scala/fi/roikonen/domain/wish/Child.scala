@@ -77,6 +77,9 @@ object Child {
   case class WishCancelled(wishId: UUID, childId: String) extends ChildEvent with WishRelated
       derives ReadWriter
 
+  case class WishFulfilled(wishId: UUID, childId: String) extends ChildEvent with WishRelated
+      derives ReadWriter
+
   case class BecameNaughty(childId: String, onNaughtyListUntil: Instant)
       extends ChildEvent
       with NaughtinessRelated derives ReadWriter
@@ -85,6 +88,7 @@ object Child {
     given ReadWriter[ChildEvent] = ReadWriter.merge(
       summon[ReadWriter[WishApproved]],
       summon[ReadWriter[WishRejected]],
+      summon[ReadWriter[WishFulfilled]],
       summon[ReadWriter[WishCancelled]],
       summon[ReadWriter[BecameNaughty]]
     )
@@ -104,6 +108,7 @@ object Child {
       case e: WishApproved  => handleWishApproved(this, e)
       case e: WishRejected  => handleWishRejected(this, e)
       case e: WishCancelled => handleWishCancelled(this, e)
+      case e: WishFulfilled => handleWishFulfilled(this, e)
       case e: BecameNaughty => handleBecameNaughty(this, e)
     }
 
@@ -116,9 +121,6 @@ object Child {
   private def handleWishApproved(state: State, e: WishApproved): State =
     state.copy(wishes = state.wishes + (e.wishId -> e.wish))
 
-  private def handleWishCancelled(state: State, e: WishCancelled): State =
-    state.copy(wishes = state.wishes - e.wishId)
-
   private def handleWishRejected(state: State, e: WishRejected): State = {
     if (e.reason.equals(RejectionReason.NaughtyWish)) {
       state.copy(bannedUntil = e.rejectionTime.plusMillis(NAUGHTY_WISH_BAN_DURATION.toMillis))
@@ -126,6 +128,12 @@ object Child {
       state
     }
   }
+
+  private def handleWishCancelled(state: State, e: WishCancelled): State =
+    state.copy(wishes = state.wishes - e.wishId)
+
+  private def handleWishFulfilled(state: State, e: WishFulfilled): State =
+    state.copy(wishes = state.wishes - e.wishId)
 
   private def handleBecameNaughty(state: State, e: BecameNaughty): State = {
     state.copy(onNaughtyListUntil = e.onNaughtyListUntil)
@@ -207,10 +215,22 @@ object Child {
 
   val markNaughtyHandler: CommandHandler[State, MarkNaughty] =
     (state: State, command: MarkNaughty) => {
-      if (state.onNaughtyListUntil.isBefore(command.onNaughtyListUntil)) {
+      if (command.onNaughtyListUntil.isBefore(Instant.now())) {
+        CommandEffect(
+          Seq.empty,
+          CommandResponse(
+            400,
+            Some(s"The given date has already expired: ${command.onNaughtyListUntil}")
+          )
+        )
+      } else if (state.onNaughtyListUntil.isBefore(command.onNaughtyListUntil)) {
         CommandEffect(
           Seq(BecameNaughty(state.id, command.onNaughtyListUntil)) ++
-            state.wishes.keys.map(wish => WishCancelled(wish, state.id))
+            state.wishes.keys.map(wish => WishCancelled(wish, state.id)),
+          CommandResponse(
+            200,
+            Some(s"Child ${state.id} marked naughty until ${command.onNaughtyListUntil}")
+          )
         )
       } else {
         CommandEffect(

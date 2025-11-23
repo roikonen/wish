@@ -21,7 +21,7 @@ object PublicEvent {
 
   case class WishCancelled(id: UUID) extends PublicEvent derives ReadWriter
 
-  case class ChildBecameNaughty(id: String, naughtyWish: String, rejectionTime: Instant)
+  case class NaughtinessDetected(id: String, naughtyWish: String, rejectionTime: Instant)
       extends PublicEvent derives ReadWriter
 
 }

@@ -1,7 +1,7 @@
 package fi.roikonen.app.http
 
-import fi.roikonen.structure.{EventBus, Journal}
-import fi.roikonen.domain.wish.Child.{CancelWish, MakeWish}
+import fi.roikonen.structure.{EventBus, Journal, PrivateEvent, StreamIdentifier}
+import fi.roikonen.domain.wish.Child.{CancelWish, MakeWish, MarkNaughty, WishFulfilled}
 import cask.*
 import cask.endpoints.QueryParamReader
 import fi.roikonen.app.App
@@ -9,7 +9,10 @@ import fi.roikonen.domain.wish.Child
 import fi.roikonen.structure.Command.CommandResponse
 import fi.roikonen.domain.wish.PublicEvent
 import fi.roikonen.domain.wish.policy.gatekeeper.VerifyWish
+import fi.roikonen.domain.wish.projection.Wish
+import upickle.default.*
 
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
@@ -17,6 +20,10 @@ import scala.concurrent.{Await, Future}
 object HttpApp extends cask.MainRoutes {
   given QueryParamReader[UUID] =
     new QueryParamReader.SimpleParam[UUID](s => UUID.fromString(s))
+  given Reader[Instant] = reader[String].map(Instant.parse)
+  given ReadWriter[PrivateEvent] = ReadWriter.merge(
+    summon[ReadWriter[Child.ChildEvent]]
+  )
 
   private val application = App()
   private val journal: Journal = application.journal
@@ -32,7 +39,7 @@ object HttpApp extends cask.MainRoutes {
     commandResponse.code
   )
 
-  @cask.post("/child/:childId/wish/:wish")
+  @cask.postJson("/child/:childId/wish")
   def makeWish(childId: String, wish: String): cask.Response[String] = {
     val responseF =
       for {
@@ -45,7 +52,7 @@ object HttpApp extends cask.MainRoutes {
               (state, cursor) <- Child.State(childId).rehydrate(journal)
               effect = Child.makeWishHandler.handle(state, command)
               commandResponse <- journal
-                .append(effect.events, cursor)
+                .append(effect.events, Option(cursor))
                 .map(_ => effect.commandResponse)
             } yield commandResponse
           case Left(commandResponse) => Future.successful(commandResponse)
@@ -60,7 +67,30 @@ object HttpApp extends cask.MainRoutes {
       for {
         (state, cursor) <- Child.State(childId).rehydrate(journal)
         effect = Child.cancelWishHandler.handle(state, CancelWish(id))
-        _ <- journal.append(effect.events, cursor)
+        _ <- journal.append(effect.events, Option(cursor))
+      } yield mapToResponse(effect.commandResponse)
+    Await.result(responseF, 10.seconds)
+  }
+
+  @cask.post("/integration/wish/:id/mark_fulfilled")
+  def markWishFulfilled(id: UUID): cask.Response[String] = {
+    val responseF = for {
+      childId <- Wish(id).rehydrate(journal).map((wish, _) => wish.childId)
+      _ <- journal.append(Seq(WishFulfilled(id, childId)), None)
+    } yield mapToResponse(CommandResponse())
+    Await.result(responseF, 10.seconds)
+  }
+
+  @cask.postJson("/integration/child/:id/mark_naughty")
+  def markChildNaughty(id: String, expirationTime: Instant): cask.Response[String] = {
+    val responseF =
+      for {
+        (state, cursor) <- Child.State(id).rehydrate(journal)
+        effect = Child.markNaughtyHandler.handle(
+          state,
+          MarkNaughty(onNaughtyListUntil = expirationTime)
+        )
+        _ <- journal.append(effect.events, Option(cursor))
       } yield mapToResponse(effect.commandResponse)
     Await.result(responseF, 10.seconds)
   }
@@ -86,6 +116,15 @@ object HttpApp extends cask.MainRoutes {
   @cask.get("/events/private/:from")
   def getPrivateEvents(from: Long): cask.Response[String] =
     getTopicEvents("private_events", from)
+
+  @cask.get("/stream/:stream/:from")
+  def getStream(stream: String, from: Long): cask.Response[String] = {
+    val responseF =
+      for {
+        (events, cursor) <- journal.read(StreamIdentifier.fromString(stream), from)
+      } yield jsonResponse(events)
+    Await.result(responseF, 10.seconds)
+  }
 
   initialize()
 }

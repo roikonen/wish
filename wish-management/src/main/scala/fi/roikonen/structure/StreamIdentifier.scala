@@ -1,8 +1,15 @@
 package fi.roikonen.structure
 
 object StreamIdentifier {
+
+  final val SEPARATOR: Char = '_'
+
   // This is stream identifier for every event.
   def all: StreamIdentifier = StreamIdentifier()
+
+  def fromString(identifier: String): StreamIdentifier = StreamIdentifier(
+    identifier.split(StreamIdentifier.SEPARATOR)*
+  )
 }
 
 /** Events belong to the main stream and additionally to substreams. e.g. CatJumped could belong to:
@@ -23,5 +30,7 @@ case class StreamIdentifier(ids: String*) {
   // Build stream IDs. e.g. ["a_b_c", "b_c", "c"]
   // e.g. "Sophie_cat_animal(_main)", "cat_animal(_main)" & "animal(_main)" - "main" is implicit.
   def branches: Set[String] =
-    ids.tails.collect { case seg if seg.nonEmpty => seg.mkString("_") }.toSet
+    ids.tails.collect {
+      case seg if seg.nonEmpty => seg.mkString(StreamIdentifier.SEPARATOR.toString)
+    }.toSet
 }

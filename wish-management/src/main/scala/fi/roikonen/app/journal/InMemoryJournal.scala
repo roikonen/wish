@@ -13,7 +13,7 @@ class InMemoryJournal extends Journal {
   private def getCursor(streamId: StreamIdentifier): Journal.Cursor =
     streams.getOrElse(streamId.headBranch, Seq.empty).size
 
-  override def append(events: Seq[PrivateEvent], cursor: Journal.Cursor): Future[Unit] = {
+  override def append(events: Seq[PrivateEvent], cursor: Option[Journal.Cursor]): Future[Unit] = {
     require(
       events.map(_.consistencyStream).distinct.size <= 1,
       "All incoming events must have the same consistency stream"
@@ -23,8 +23,8 @@ class InMemoryJournal extends Journal {
 
     synchronized {
 
-      // Optimistic locking applied here
-      if (getCursor(events.head.consistencyStream) != cursor)
+      // Optimistic locking applied here if cursor is defined
+      if (cursor.isDefined && getCursor(events.head.consistencyStream) != cursor.get)
         return Future.failed(IllegalStateException("Update failed due to concurrent modification"))
 
       for (event <- events) {
@@ -42,10 +42,11 @@ class InMemoryJournal extends Journal {
 
   override def read(
     streamId: StreamIdentifier,
-    offset: Int = 0
+    offset: Journal.Cursor = 0
   ): Future[(Seq[PrivateEvent], Journal.Cursor)] = {
     val stream = streams.getOrElse(streamId.headBranch, Seq.empty)
-    Future.successful(stream.drop(offset), stream.size)
+    // As this is in-memory non-production code, we can cast offset from Long to Int.
+    Future.successful(stream.drop(offset.toInt), stream.size)
   }
 
   override def storeOffset(streamId: StreamIdentifier, cursor: Cursor): Future[Unit] = {
