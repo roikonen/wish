@@ -19,7 +19,7 @@ class NaughtyListSpec extends AnyFeatureSpec with GivenWhenThen {
       val state = emptyList
 
       When("from is accessed")
-      val from = state.from
+      val from = state.sourceStream
 
       Then("the stream identifier represents the global naughtiness stream")
       val expected = StreamIdentifier("naughtiness")
@@ -35,7 +35,7 @@ class NaughtyListSpec extends AnyFeatureSpec with GivenWhenThen {
       )
 
       When("default is called")
-      val defaultState = state.default
+      val defaultState = state.initialState
 
       Then("the resulting naughty list is empty")
       assert(defaultState.children.isEmpty)

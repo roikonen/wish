@@ -11,11 +11,11 @@ import java.time.Instant
 case class NaughtyList(children: Map[String, Instant] = Map.empty)
     extends StateProjection[NaughtyList] {
 
-  override def from: StreamIdentifier = StreamIdentifier("naughtiness")
+  override def sourceStream: StreamIdentifier = StreamIdentifier("naughtiness")
 
   override def project(event: PrivateEvent): NaughtyList = event match {
     case e: BecameNaughty => this.copy(children = children + (e.childId -> e.onNaughtyListUntil))
   }
 
-  override def default: NaughtyList = NaughtyList()
+  override def initialState: NaughtyList = NaughtyList()
 }

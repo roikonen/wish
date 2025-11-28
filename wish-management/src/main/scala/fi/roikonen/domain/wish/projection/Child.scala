@@ -24,7 +24,7 @@ case class Child(
   onNaughtyListUntil: Instant = Instant.MIN,
   bannedUntil: Instant = Instant.MIN
 ) extends StateProjection[Child] {
-  def from: StreamIdentifier = Child.identifier(id)
+  def sourceStream: StreamIdentifier = Child.identifier(id)
 
   def project(privateEvent: PrivateEvent): Child = privateEvent match {
     case e: WishApproved  => Child.handleWishApproved(this, e)
@@ -34,7 +34,7 @@ case class Child(
     case e: BecameNaughty => Child.handleBecameNaughty(this, e)
   }
 
-  override def default: Child = Child(id)
+  override def initialState: Child = Child(id)
 }
 
 object Child {

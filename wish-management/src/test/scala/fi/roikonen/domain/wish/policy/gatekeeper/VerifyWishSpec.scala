@@ -37,7 +37,7 @@ class VerifyWishSpec extends AnyFeatureSpec with GivenWhenThen {
       stream: StreamIdentifier,
       offset: Journal.Cursor
     ): Future[(Seq[PrivateEvent], Journal.Cursor)] = {
-      val naughtyStream = NaughtyList().from
+      val naughtyStream = NaughtyList().sourceStream
       if (stream == naughtyStream) {
         val events: Seq[PrivateEvent] =
           naughtyChildren.toSeq.map { case (id, until) =>

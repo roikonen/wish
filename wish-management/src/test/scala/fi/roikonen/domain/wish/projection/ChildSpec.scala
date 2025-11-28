@@ -28,7 +28,7 @@ class ChildSpec extends AnyFeatureSpec with GivenWhenThen {
       val state   = emptyState(childId)
 
       When("from is accessed")
-      val from = state.from
+      val from = state.sourceStream
 
       Then("the stream identifier is based on the child id and Child stream type")
       val expected = StreamIdentifier(childId, Stream.Child.value)
@@ -46,7 +46,7 @@ class ChildSpec extends AnyFeatureSpec with GivenWhenThen {
       )
 
       When("default is called")
-      val defaultState = state.default
+      val defaultState = state.initialState
 
       Then("the resulting state has the same id but no wishes or bans")
       assert(defaultState.id == childId)

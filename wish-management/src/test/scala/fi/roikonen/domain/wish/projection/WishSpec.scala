@@ -21,7 +21,7 @@ class WishSpec extends AnyFeatureSpec with GivenWhenThen {
       val state = newProjection(id)
 
       When("from is accessed")
-      val from = state.from
+      val from = state.sourceStream
 
       Then("the stream identifier is based on the id and Wish stream type")
       val expected = StreamIdentifier(id.toString, Stream.Wish.value)
@@ -34,7 +34,7 @@ class WishSpec extends AnyFeatureSpec with GivenWhenThen {
       val state = Wish(id, childId = "child-123")
 
       When("default is called")
-      val defaultState = state.default
+      val defaultState = state.initialState
 
       Then("the resulting projection has the same id but an empty childId")
       assert(defaultState.id == id)

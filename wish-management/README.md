@@ -4,8 +4,13 @@ The aim for this project is demonstrate Scalable Modeling methodology.
 
 **Disclaimer:** `fi.roikonen.app` package content is quickly crafted by using all possible bad software development methods. It is created just to run `fi.roikonen.domain` with `fi.roikonen.structure`.
 
-
 ## Running the application
+
+### Prerequisites
+
+* JDK 21
+* SBT 1.10.x or newer
+
 ```bash
 sbt run
 ```

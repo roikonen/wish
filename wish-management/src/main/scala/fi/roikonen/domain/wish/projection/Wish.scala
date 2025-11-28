@@ -8,11 +8,11 @@ import java.util.UUID
 
 case class Wish(id: UUID, childId: String = "") extends StateProjection[Wish] {
 
-  override def from: StreamIdentifier = StreamIdentifier(id.toString, Stream.Wish.value)
+  override def sourceStream: StreamIdentifier = StreamIdentifier(id.toString, Stream.Wish.value)
 
   override def project(event: PrivateEvent): Wish = event match {
     case e: WishApproved => this.copy(childId = e.childId)
   }
 
-  override def default: Wish = Wish(id)
+  override def initialState: Wish = Wish(id)
 }
