@@ -1,6 +1,6 @@
 # Wish Management
 
-The aim for this project is demonstrate [Scalable Modeling](https://roikonen.github.io/scalablemodeling/) methodology.
+The aim for this project is to demonstrate [Scalable Modeling](https://roikonen.github.io/scalablemodeling/) methodology.
 
 ## Why?
 ![](doc/pic/why.png)
