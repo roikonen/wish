@@ -2,6 +2,27 @@
 
 The aim for this project is demonstrate Scalable Modeling methodology.
 
+## Why?
+![](doc/pic/why.png)
+
+## Ubiquitous Language
+![](doc/pic/ul.png)
+
+## External Systems
+![](doc/pic/externals.png)
+
+## Temporal Model
+![](doc/pic/tm.png)
+
+## Spatial Model
+![](doc/pic/sm.png)
+
+## Integrations
+![](doc/pic/integrations.png)
+
+## Explicit Spatial Model
+![](doc/pic/esm.png)
+
 **Disclaimer:** `fi.roikonen.app` package content is quickly crafted by using all possible bad software development methods. It is created just to run `fi.roikonen.domain` with `fi.roikonen.structure`.
 
 ## Running the application
@@ -100,6 +121,3 @@ Streams feed projections like `Child.State`, `NaughtyList` and `Wish`.
 ```bash
  curl -s "http://localhost:8080/stream/simo_child/0" | jq .
 ```
-
-## TODO List
--  [ ] Create `StateStore` and make `NaughtyList` state stored instead of event sourced.

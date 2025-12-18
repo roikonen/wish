@@ -43,7 +43,7 @@ object HttpApp extends cask.MainRoutes {
     val responseF =
       for {
         gatekeeperEffect <- VerifyWish(childId, journal)
-          .handle(MakeWish(wish, None, None))
+          .handle(MakeWish(wish))
           .map(_.effect)
         commandResponse <- gatekeeperEffect match {
           case Right(command) =>
@@ -103,12 +103,19 @@ object HttpApp extends cask.MainRoutes {
     Await.result(responseF, 10.seconds)
   }
 
+  case class PublicEventWithCursor(cursor: Long, event: PublicEvent)
+  object PublicEventWithCursor {
+    implicit val rw: upickle.default.ReadWriter[PublicEventWithCursor] = upickle.default.macroRW
+  }
+
   @cask.get("/events/:topic/:from")
   def getTopicEvents(topic: EventBus.TopicId, from: Long): cask.Response[String] = {
     val responseF =
       for {
         events <- eventBus.fetch(topic, from)
-      } yield jsonResponse(events.map((_, event) => event))
+      } yield jsonResponse(events.map { case (cursor, event) =>
+        PublicEventWithCursor(cursor, event)
+      })
     Await.result(responseF, 10.seconds)
   }
 
@@ -116,12 +123,18 @@ object HttpApp extends cask.MainRoutes {
   def getPrivateEvents(from: Long): cask.Response[String] =
     getTopicEvents("private_events", from)
 
+  case class StreamResponse(events: Seq[PrivateEvent], cursor: Long)
+
+  object StreamResponse {
+    implicit val rw: ReadWriter[StreamResponse] = macroRW
+  }
+
   @cask.get("/stream/:stream/:from")
   def getStream(stream: String, from: Long): cask.Response[String] = {
     val responseF =
       for {
         (events, cursor) <- journal.read(StreamIdentifier.fromString(stream), from)
-      } yield jsonResponse(events)
+      } yield jsonResponse(StreamResponse(events, cursor))
     Await.result(responseF, 10.seconds)
   }
 

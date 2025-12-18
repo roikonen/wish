@@ -21,8 +21,8 @@ object Child {
 
   case class MakeWish(
     wish: String,
-    naughtyWish: Option[Boolean],
-    onNaughtyListUntil: Option[Instant]
+    naughtyWish: Option[Boolean] = None,
+    onNaughtyListUntil: Option[Instant] = None
   ) extends Command
 
   case class CancelWish(id: UUID) extends Command
