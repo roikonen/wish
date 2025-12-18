@@ -1,4 +1,4 @@
-package fi.roikonen.app.journal
+package fi.roikonen.app
 
 import fi.roikonen.structure.Journal.Cursor
 import fi.roikonen.structure.{Journal, PrivateEvent, StreamIdentifier}

@@ -1,14 +1,14 @@
-package fi.roikonen.app.http
+package fi.roikonen.app
 
-import fi.roikonen.structure.{EventBus, Journal, PrivateEvent, StreamIdentifier}
-import fi.roikonen.domain.wish.Child.{CancelWish, MakeWish, MarkNaughty}
-import fi.roikonen.domain.wish.PrivateEvents.{ChildEvent, WishFulfilled}
 import cask.*
 import cask.endpoints.QueryParamReader
 import fi.roikonen.app.App
-import fi.roikonen.structure.Command.CommandResponse
-import fi.roikonen.domain.wish.{Child, PublicEvent, projection}
+import fi.roikonen.domain.wish.Child.{CancelWish, MakeWish, MarkNaughty}
+import fi.roikonen.domain.wish.PrivateEvents.{ChildEvent, WishFulfilled}
 import fi.roikonen.domain.wish.policy.gatekeeper.VerifyWish
+import fi.roikonen.domain.wish.{Child, PublicEvent, projection}
+import fi.roikonen.structure.Command.CommandResponse
+import fi.roikonen.structure.{EventBus, Journal, PrivateEvent, StreamIdentifier}
 import upickle.default.*
 
 import java.time.Instant

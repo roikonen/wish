@@ -1,4 +1,4 @@
-package fi.roikonen.app.events
+package fi.roikonen.app
 
 import fi.roikonen.domain.wish.PublicEvent
 import fi.roikonen.structure.EventBus

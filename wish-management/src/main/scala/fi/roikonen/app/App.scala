@@ -1,7 +1,5 @@
 package fi.roikonen.app
 
-import fi.roikonen.app.events.InMemoryEventBus
-import fi.roikonen.app.journal.InMemoryJournal
 import fi.roikonen.domain.wish.PublicEvent
 import fi.roikonen.domain.wish.policy.eventhandler.{
   PublishPrivateEvents,
