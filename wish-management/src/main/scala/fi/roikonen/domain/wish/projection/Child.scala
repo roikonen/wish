@@ -32,6 +32,7 @@ case class Child(
     case e: WishCancelled => Child.handleWishCancelled(this, e)
     case e: WishFulfilled => Child.handleWishFulfilled(this, e)
     case e: BecameNaughty => Child.handleBecameNaughty(this, e)
+    case _                => this
   }
 
   override def initialState: Child = Child(id)

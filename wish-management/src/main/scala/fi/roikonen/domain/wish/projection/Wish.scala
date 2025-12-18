@@ -12,6 +12,7 @@ case class Wish(id: UUID, childId: String = "") extends StateProjection[Wish] {
 
   override def project(event: PrivateEvent): Wish = event match {
     case e: WishApproved => this.copy(childId = e.childId)
+    case _               => this
   }
 
   override def initialState: Wish = Wish(id)

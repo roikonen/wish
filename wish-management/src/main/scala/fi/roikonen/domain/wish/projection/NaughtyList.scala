@@ -15,7 +15,7 @@ case class NaughtyList(children: Map[String, Instant] = Map.empty)
 
   override def project(event: PrivateEvent): NaughtyList = event match {
     case e: BecameNaughty => this.copy(children = children + (e.childId -> e.onNaughtyListUntil))
-    case _ => this 
+    case _                => this
   }
 
   override def initialState: NaughtyList = NaughtyList()
