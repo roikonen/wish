@@ -11,11 +11,16 @@ import scala.concurrent.{ExecutionContext, Future}
 class VerifyWish(childId: String, journal: Journal)(implicit ec: ExecutionContext)
     extends Gatekeeper[Child.MakeWish] {
   override def handle(command: Child.MakeWish): Future[Gatekeeper.Effect[Child.MakeWish]] = {
+
+    val isOnNaughtyListF = NaughtyList()
+      .rehydrate(journal)
+      .map((list, _) => list.children.getOrElse(childId, Instant.MIN))
+
+    val isNaughtyWishF = checkIfNaughty(command.wish)
+
     for {
-      isOnNaughtyList <- NaughtyList()
-        .rehydrate(journal)
-        .map((list, _) => list.children.getOrElse(childId, Instant.MIN))
-      isNaughtyWish <- checkIfNaughty(command.wish)
+      isOnNaughtyList <- isOnNaughtyListF
+      isNaughtyWish <- isNaughtyWishF
     } yield Gatekeeper.Effect[Child.MakeWish](
       Right(
         command.copy(
